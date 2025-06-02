@@ -4,7 +4,8 @@
 
 #pragma once
 #include <vector>
-
+#include "afxwin.h"
+#include "atlimage.h"
 
 // CcircleMakerDlg dialog
 class CcircleMakerDlg : public CDialogEx
@@ -41,15 +42,20 @@ public:
 	afx_msg void OnBnClickedSetRadius();
 	afx_msg void OnBnClickedReset();
 	afx_msg void OnBnClickedRandom();
-	void UpdateClickPointUI();
-
-	DECLARE_MESSAGE_MAP()
+	
 private:
-	int radius = 10;  // radius
+	void UpdateClickPointUI(); // click event
+
+	int m_radius = 10;  // radius
 	int borderWidth = 2;
 	struct PointCircle {
 		CPoint center;
-		bool selected = false; // detect drag
+		bool selected = false; // click point tracker
 	};
-	std::vector<PointCircle> clickPoints; // detect point
+	std::vector<PointCircle> m_clickPoints; // detect point
+	void drawCircle(unsigned char* fm, int x, int y, int nRadius, int nGray);
+	bool isInCircle(int i, int j, int nCenterX, int nCenterY, int nRadius); //draw circle
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point); //draw trigger
+
+	DECLARE_MESSAGE_MAP()
 };

@@ -208,7 +208,7 @@ void CcircleMakerDlg::OnBnClickedSetRadius()
 	int r = _ttoi(str);
 	if (r > 0)
 	{
-		radius = r;
+		m_radius = r;
 		AfxMessageBox(_T("반지름이 설정되었습니다."));
 	}
 	else
@@ -228,22 +228,91 @@ void CcircleMakerDlg::OnBnClickedRandom() {
 //detect point
 void CcircleMakerDlg::UpdateClickPointUI()
 {
-	if (clickPoints.size() > 0)
+	CString str;
+	if (m_clickPoints.size() > 0)
 	{
-		CString str;
-		str.Format(_T("Point 1: (%d, %d)"), clickPoints[0].center.x, clickPoints[0].center.y);
+		str.Format(_T("Point 1: (%d, %d)"), m_clickPoints[0].center.x, m_clickPoints[0].center.y);
 		SetDlgItemText(IDC_STATIC_POS1, str);
 	}
-	if (clickPoints.size() > 1)
+	if (m_clickPoints.size() > 1)
 	{
-		CString str;
-		str.Format(_T("Point 2: (%d, %d)"), clickPoints[1].center.x, clickPoints[1].center.y);
+		str.Format(_T("Point 2: (%d, %d)"), m_clickPoints[1].center.x, m_clickPoints[1].center.y);
 		SetDlgItemText(IDC_STATIC_POS2, str);
 	}
-	if (clickPoints.size() > 2)
+	if (m_clickPoints.size() > 2)
 	{
-		CString str;
-		str.Format(_T("Point 3: (%d, %d)"), clickPoints[2].center.x, clickPoints[2].center.y);
+		str.Format(_T("Point 3: (%d, %d)"), m_clickPoints[2].center.x, m_clickPoints[2].center.y);
 		SetDlgItemText(IDC_STATIC_POS3, str);
 	}
+}
+
+// draw circle
+void CcircleMakerDlg::drawCircle(unsigned char* fm, int x, int y, int nRadius, int nGray)
+{
+	int nCenterX = x + nRadius;
+	int nCenterY = y + nRadius;
+	int nPitch = m_image.GetPitch();
+
+
+	for (int j = y; j < y + nRadius * 2; j++) {
+		for (int i = x; i < x + nRadius * 2; i++) {
+			if (isInCircle(i, j, nCenterX, nCenterY, nRadius))
+				fm[j*nPitch + i] = nGray;
+		}
+	}
+}
+
+bool CcircleMakerDlg::isInCircle(int i, int j, int nCenterX, int nCenterY, int nRadius)
+{
+	bool bRet = false;
+
+	double dX = i - nCenterX;
+	double dY = j - nCenterY;
+	double dDist = dX * dX + dY * dY;
+
+	if (dDist < nRadius*nRadius) {
+		bRet = true;
+	}
+
+	return bRet;
+}
+
+// click event
+void CcircleMakerDlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	CDialogEx::OnLButtonDown(nFlags, point);
+
+	if (m_image.IsNull())
+	{
+		AfxMessageBox(_T("먼저 이미지를 초기화하세요."));
+		return;
+	}
+
+	if (m_clickPoints.size() >= 3)
+	{
+		AfxMessageBox(_T("더 이상 클릭할 수 없습니다. (최대 3개)"));
+		return;
+	}
+
+	PointCircle pc;
+	pc.center = point;
+	m_clickPoints.push_back(pc);
+
+	int nWidth = m_image.GetWidth();
+	int nHeight = m_image.GetHeight();
+	int nPitch = m_image.GetPitch();
+	unsigned char* fm = (unsigned char*)m_image.GetBits();
+
+	if (point.x - m_radius < 0 || point.y - m_radius < 0 ||
+		point.x + m_radius >= nWidth || point.y + m_radius >= nHeight)
+	{
+		AfxMessageBox(_T("이미지 영역을 벗어났습니다."));
+		return;
+	}
+
+	drawCircle(fm, point.x - m_radius, point.y - m_radius, m_radius, 80);
+
+	Invalidate(FALSE);
+
+	UpdateClickPointUI();
 }
