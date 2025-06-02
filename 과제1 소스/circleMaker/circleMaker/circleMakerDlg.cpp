@@ -99,6 +99,9 @@ BOOL CcircleMakerDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+	SetDlgItemText(IDC_STATIC_POS1, _T("Point 1: ( , )"));
+	SetDlgItemText(IDC_STATIC_POS2, _T("Point 2: ( , )"));
+	SetDlgItemText(IDC_STATIC_POS3, _T("Point 3: ( , )"));
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
