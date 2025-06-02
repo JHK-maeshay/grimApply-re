@@ -64,6 +64,11 @@ BEGIN_MESSAGE_MAP(CcircleMakerDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+
+	//buttons
+	ON_BN_CLICKED(IDC_BTN_SET_RADIUS, &CcircleMakerDlg::OnBnClickedSetRadius)
+	ON_BN_CLICKED(IDC_BTN_RESET, &CcircleMakerDlg::OnBnClickedReset)
+	ON_BN_CLICKED(IDC_BTN_RANDOM, &CcircleMakerDlg::OnBnClickedRandom)
 END_MESSAGE_MAP()
 
 
@@ -99,6 +104,7 @@ BOOL CcircleMakerDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+	SetDlgItemText(IDC_EDIT_RADIUS, _T("10"));
 	SetDlgItemText(IDC_STATIC_POS1, _T("Point 1: ( , )"));
 	SetDlgItemText(IDC_STATIC_POS2, _T("Point 2: ( , )"));
 	SetDlgItemText(IDC_STATIC_POS3, _T("Point 3: ( , )"));
@@ -155,3 +161,50 @@ HCURSOR CcircleMakerDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+//SET RADIUS 버튼 함수
+void CcircleMakerDlg::OnBnClickedSetRadius()
+{
+	CString str;
+	GetDlgItemText(IDC_EDIT_RADIUS, str);
+	int r = _ttoi(str);
+	if (r > 0)
+	{
+		radius = r;
+		AfxMessageBox(_T("반지름이 설정되었습니다."));
+	}
+	else
+	{
+		AfxMessageBox(_T("유효한 반지름 값을 입력하세요."));
+	}
+}
+
+void CcircleMakerDlg::OnBnClickedReset() {
+
+}
+
+void CcircleMakerDlg::OnBnClickedRandom() {
+
+}
+
+//detect point
+void CcircleMakerDlg::UpdateClickPointUI()
+{
+	if (clickPoints.size() > 0)
+	{
+		CString str;
+		str.Format(_T("Point 1: (%d, %d)"), clickPoints[0].center.x, clickPoints[0].center.y);
+		SetDlgItemText(IDC_STATIC_POS1, str);
+	}
+	if (clickPoints.size() > 1)
+	{
+		CString str;
+		str.Format(_T("Point 2: (%d, %d)"), clickPoints[1].center.x, clickPoints[1].center.y);
+		SetDlgItemText(IDC_STATIC_POS2, str);
+	}
+	if (clickPoints.size() > 2)
+	{
+		CString str;
+		str.Format(_T("Point 3: (%d, %d)"), clickPoints[2].center.x, clickPoints[2].center.y);
+		SetDlgItemText(IDC_STATIC_POS3, str);
+	}
+}
