@@ -161,9 +161,48 @@ HCURSOR CcircleMakerDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+// 이미지 판별 함수
+BOOL CcircleMakerDlg::validImgPos(int x, int y)
+{
+	int nWidth = m_image.GetWidth();
+	int nHeight = m_image.GetHeight();
+	CRect rect(0, 0, nWidth, nHeight);
+
+	return rect.PtInRect(CPoint(x, y));
+}
+
+// 출력 함수
+void CcircleMakerDlg::UpdateDisplay()
+{
+	CClientDC dc(this);
+	m_image.Draw(dc, 0, 0);
+}
+
 //SET RADIUS 버튼 함수
 void CcircleMakerDlg::OnBnClickedSetRadius()
 {
+	//초기화 함수
+	int nWidth = 640;
+	int nHeight = 480;
+	int nBpp = 8;
+
+	m_image.Create(nWidth, -nHeight, nBpp);
+	if (nBpp == 8) {
+		static RGBQUAD rgb[256];
+		for (int i = 0; i < 256; i++)
+			rgb[i].rgbRed = rgb[i].rgbGreen = rgb[i].rgbBlue = i;
+		m_image.SetColorTable(0, 256, rgb);
+	}
+
+	int nPitch = m_image.GetPitch();
+	unsigned char* fm = (unsigned char*)m_image.GetBits();
+
+	memset(fm, 0xff, nWidth * nHeight);
+
+	UpdateDisplay();
+
+
+
 	CString str;
 	GetDlgItemText(IDC_EDIT_RADIUS, str);
 	int r = _ttoi(str);

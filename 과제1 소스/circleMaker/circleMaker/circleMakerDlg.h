@@ -10,6 +10,9 @@
 class CcircleMakerDlg : public CDialogEx
 {
 // Construction
+private:
+	CImage m_image;
+	BOOL validImgPos(int x, int y);
 public:
 	CcircleMakerDlg(CWnd* pParent = NULL);	// standard constructor
 
@@ -34,6 +37,7 @@ protected:
 
 	//buttons
 public:
+	void UpdateDisplay();
 	afx_msg void OnBnClickedSetRadius();
 	afx_msg void OnBnClickedReset();
 	afx_msg void OnBnClickedRandom();
