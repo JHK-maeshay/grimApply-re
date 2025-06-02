@@ -65,6 +65,9 @@ BEGIN_MESSAGE_MAP(CcircleMakerDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 
+	//click event
+	ON_WM_LBUTTONDOWN()
+
 	//buttons
 	ON_BN_CLICKED(IDC_BTN_SET_RADIUS, &CcircleMakerDlg::OnBnClickedSetRadius)
 	ON_BN_CLICKED(IDC_BTN_RESET, &CcircleMakerDlg::OnBnClickedReset)
@@ -133,11 +136,9 @@ void CcircleMakerDlg::OnPaint()
 {
 	if (IsIconic())
 	{
-		CPaintDC dc(this); // device context for painting
-
+		CPaintDC dc(this);
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
 
-		// Center icon in client rectangle
 		int cxIcon = GetSystemMetrics(SM_CXICON);
 		int cyIcon = GetSystemMetrics(SM_CYICON);
 		CRect rect;
@@ -145,12 +146,19 @@ void CcircleMakerDlg::OnPaint()
 		int x = (rect.Width() - cxIcon + 1) / 2;
 		int y = (rect.Height() - cyIcon + 1) / 2;
 
-		// Draw the icon
 		dc.DrawIcon(x, y, m_hIcon);
 	}
 	else
 	{
-		CDialogEx::OnPaint();
+		CPaintDC dc(this);
+		if (!m_image.IsNull())
+		{
+			m_image.Draw(dc, 0, 0);
+		}
+		else
+		{
+			CDialogEx::OnPaint();
+		}
 	}
 }
 
@@ -209,16 +217,39 @@ void CcircleMakerDlg::OnBnClickedSetRadius()
 	if (r > 0)
 	{
 		m_radius = r;
-		AfxMessageBox(_T("반지름이 설정되었습니다."));
+		AfxMessageBox(_T("반지름이 설정되었습니다!"));
 	}
 	else
 	{
-		AfxMessageBox(_T("유효한 반지름 값을 입력하세요."));
+		AfxMessageBox(_T("유효한 값을 입력하세요!"));
 	}
 }
 
 void CcircleMakerDlg::OnBnClickedReset() {
+	CRect rect;
+    GetClientRect(&rect);
+    int nWidth = rect.Width();
+    int nHeight = rect.Height();
+    int nBpp = 8;
 
+    if (!m_image.IsNull())
+    {
+        m_image.Destroy();
+    }
+
+    m_image.Create(nWidth, -nHeight, nBpp);
+
+    int nPitch = m_image.GetPitch();
+    unsigned char* fm = (unsigned char*)m_image.GetBits();
+    memset(fm, 0xFF, nPitch * nHeight);
+
+    m_clickPoints.clear();
+
+    SetDlgItemText(IDC_STATIC_POS1, _T("Point 1: ( , )"));
+    SetDlgItemText(IDC_STATIC_POS2, _T("Point 2: ( , )"));
+    SetDlgItemText(IDC_STATIC_POS3, _T("Point 3: ( , )"));
+
+    Invalidate(FALSE);
 }
 
 void CcircleMakerDlg::OnBnClickedRandom() {
@@ -284,13 +315,13 @@ void CcircleMakerDlg::OnLButtonDown(UINT nFlags, CPoint point)
 
 	if (m_image.IsNull())
 	{
-		AfxMessageBox(_T("먼저 이미지를 초기화하세요."));
+		AfxMessageBox(_T("SET RADIUS 를 먼저 진행하세요!"));
 		return;
 	}
 
 	if (m_clickPoints.size() >= 3)
 	{
-		AfxMessageBox(_T("더 이상 클릭할 수 없습니다. (최대 3개)"));
+		AfxMessageBox(_T("더 이상 클릭할 수 없습니다!"));
 		return;
 	}
 
