@@ -57,5 +57,12 @@ private:
 	bool isInCircle(int i, int j, int nCenterX, int nCenterY, int nRadius); //draw circle
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point); //draw trigger
 
+	bool m_isDragging = false;
+	int m_selectedPointIndex = -1;//drag control
+	ULONGLONG m_lastUpdateTime = 0;
+
+	void OnMouseMove(UINT nFlags, CPoint point);//drag func
+	void OnLButtonUp(UINT nFlags, CPoint point);
+
 	DECLARE_MESSAGE_MAP()
 };

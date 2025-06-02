@@ -68,6 +68,12 @@ BEGIN_MESSAGE_MAP(CcircleMakerDlg, CDialogEx)
 	//click event
 	ON_WM_LBUTTONDOWN()
 
+	//drag event
+	ON_WM_MOUSEMOVE()
+
+	//release event
+	ON_WM_LBUTTONUP()
+
 	//buttons
 	ON_BN_CLICKED(IDC_BTN_SET_RADIUS, &CcircleMakerDlg::OnBnClickedSetRadius)
 	ON_BN_CLICKED(IDC_BTN_RESET, &CcircleMakerDlg::OnBnClickedReset)
@@ -332,9 +338,26 @@ void CcircleMakerDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		return;
 	}
 
+	// drag event
+	for (int i = 0; i < m_clickPoints.size(); i++)
+	{
+
+		CPoint center = m_clickPoints[i].center;
+		int dx = point.x - center.x;
+		int dy = point.y - center.y;
+		if (abs(dx) <= m_radius && abs(dy) <= m_radius)
+		{
+			m_isDragging = true;
+			m_selectedPointIndex = i;
+			m_lastUpdateTime = GetTickCount64();
+			SetCapture();
+			return; // goto drag func
+		}
+	}
+
 	if (m_clickPoints.size() >= 3)
 	{
-		AfxMessageBox(_T("더 이상 클릭할 수 없습니다!"));
+		AfxMessageBox(_T("3개 이상 만들 수 없습니다!"));
 		return;
 	}
 
@@ -359,4 +382,57 @@ void CcircleMakerDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	Invalidate(FALSE);
 
 	UpdateClickPointUI();
+}
+
+//draging
+void CcircleMakerDlg::OnMouseMove(UINT nFlags, CPoint point)
+{
+	if (m_isDragging && (GetAsyncKeyState(VK_LBUTTON) & 0x8000) == 0)
+	{
+		TRACE("OnMouseMove: Dragging forcibly ended\n");
+		m_isDragging = false;
+		m_selectedPointIndex = -1;
+		ReleaseCapture();
+		return;
+	}//드래그 강제종료
+
+	if (m_isDragging && m_selectedPointIndex >= 0)
+	{
+		ULONGLONG currentTime = GetTickCount64();
+		if (currentTime - m_lastUpdateTime >= 100) // FIX HERE to change update time
+		{
+			m_lastUpdateTime = currentTime;
+
+			m_clickPoints[m_selectedPointIndex].center = point;
+
+			int nPitch = m_image.GetPitch();
+			int nHeight = m_image.GetHeight();
+			unsigned char* fm = (unsigned char*)m_image.GetBits();
+			memset(fm, 0xFF, nPitch * nHeight);
+
+			for (int i = 0; i < m_clickPoints.size(); i++)
+			{
+				CPoint center = m_clickPoints[i].center;
+				drawCircle(fm, center.x - m_radius, center.y - m_radius, m_radius, 80);
+			}
+
+			Invalidate(FALSE);
+			UpdateClickPointUI();
+		}
+	}
+
+	CDialogEx::OnMouseMove(nFlags, point);
+}
+
+//drag end
+void CcircleMakerDlg::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	if (m_isDragging)
+	{
+		m_isDragging = false;
+		m_selectedPointIndex = -1;
+		ReleaseCapture();
+	}
+
+	CDialogEx::OnLButtonUp(nFlags, point);
 }
