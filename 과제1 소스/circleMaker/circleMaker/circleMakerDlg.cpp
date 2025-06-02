@@ -190,8 +190,10 @@ void CcircleMakerDlg::UpdateDisplay()
 void CcircleMakerDlg::OnBnClickedSetRadius()
 {
 	//초기화 함수
-	int nWidth = 640;
-	int nHeight = 480;
+	CRect rect;
+	GetClientRect(&rect);
+	int nWidth = rect.Width();
+	int nHeight = rect.Height();
 	int nBpp = 8;
 
 	m_image.Create(nWidth, -nHeight, nBpp);
@@ -208,6 +210,8 @@ void CcircleMakerDlg::OnBnClickedSetRadius()
 	memset(fm, 0xff, nWidth * nHeight);
 
 	UpdateDisplay();
+
+	Invalidate(FALSE);
 
 
 
@@ -238,6 +242,15 @@ void CcircleMakerDlg::OnBnClickedReset() {
     }
 
     m_image.Create(nWidth, -nHeight, nBpp);
+
+	// set palette
+	RGBQUAD rgb[256];
+	for (int i = 0; i < 256; i++)
+	{
+		rgb[i].rgbRed = rgb[i].rgbGreen = rgb[i].rgbBlue = i;
+	}
+	m_image.SetColorTable(0, 256, rgb);
+	//
 
     int nPitch = m_image.GetPitch();
     unsigned char* fm = (unsigned char*)m_image.GetBits();
