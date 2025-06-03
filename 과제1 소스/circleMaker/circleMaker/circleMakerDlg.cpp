@@ -300,8 +300,45 @@ void CcircleMakerDlg::OnBnClickedReset() {
     Invalidate(FALSE);
 }
 
-void CcircleMakerDlg::OnBnClickedRandom() {
+//random
+void CcircleMakerDlg::OnBnClickedRandom()
+{
+	if (m_clickPoints.size() != 3)
+	{
+		AfxMessageBox(_T("먼저 원을 3개 만들어주세요!"));
+		return;
+	}
 
+	// 스레드 시작
+	AfxBeginThread(RandomMoveThreadProc, this);
+}
+
+UINT CcircleMakerDlg::RandomMoveThreadProc(LPVOID pParam)
+{
+	CcircleMakerDlg* pDlg = reinterpret_cast<CcircleMakerDlg*>(pParam);
+	if (!pDlg) return 1;
+
+	int nWidth = pDlg->m_image.GetWidth();
+	int nHeight = pDlg->m_image.GetHeight();
+	int radius = pDlg->m_radius;
+
+	for (int i = 0; i < 10; i++)
+	{
+
+		for (int j = 0; j < pDlg->m_clickPoints.size(); j++)
+		{
+			int x = rand() % (nWidth - radius * 2) + radius;
+			int y = rand() % (nHeight - radius * 2) + radius;
+			pDlg->m_clickPoints[j].center = CPoint(x, y);
+		}
+
+		// call draw circle
+		pDlg->makeHollowCircle();
+
+		Sleep(500);
+	}
+
+	return 0;
 }
 
 //detect point

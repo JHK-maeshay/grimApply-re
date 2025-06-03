@@ -42,6 +42,7 @@ public:
 	afx_msg void OnBnClickedSetRadius();
 	afx_msg void OnBnClickedReset();
 	afx_msg void OnBnClickedRandom();
+	static UINT RandomMoveThreadProc(LPVOID pParam);//thread for random
 	
 private:
 	void UpdateClickPointUI(); // click event
