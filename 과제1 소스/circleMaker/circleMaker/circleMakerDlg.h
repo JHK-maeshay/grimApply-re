@@ -52,6 +52,8 @@ private:
 		CPoint center;
 		bool selected = false; // click point tracker
 	};
+	int m_border = 5;
+	void OnBnClickedSetBorder(); // border
 	std::vector<PointCircle> m_clickPoints; // detect point
 	void drawCircle(unsigned char* fm, int x, int y, int nRadius, int nGray);
 	bool isInCircle(int i, int j, int nCenterX, int nCenterY, int nRadius); //draw circle

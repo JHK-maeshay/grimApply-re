@@ -76,6 +76,7 @@ BEGIN_MESSAGE_MAP(CcircleMakerDlg, CDialogEx)
 
 	//buttons
 	ON_BN_CLICKED(IDC_BTN_SET_RADIUS, &CcircleMakerDlg::OnBnClickedSetRadius)
+	ON_BN_CLICKED(IDC_BTN_SET_BORDER, &CcircleMakerDlg::OnBnClickedSetBorder)
 	ON_BN_CLICKED(IDC_BTN_RESET, &CcircleMakerDlg::OnBnClickedReset)
 	ON_BN_CLICKED(IDC_BTN_RANDOM, &CcircleMakerDlg::OnBnClickedRandom)
 END_MESSAGE_MAP()
@@ -114,6 +115,7 @@ BOOL CcircleMakerDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 	SetDlgItemText(IDC_EDIT_RADIUS, _T("10"));
+	SetDlgItemText(IDC_EDIT_BORDER, _T("5"));
 	SetDlgItemText(IDC_STATIC_POS1, _T("Point 1: ( , )"));
 	SetDlgItemText(IDC_STATIC_POS2, _T("Point 2: ( , )"));
 	SetDlgItemText(IDC_STATIC_POS3, _T("Point 3: ( , )"));
@@ -195,12 +197,24 @@ void CcircleMakerDlg::UpdateDisplay()
 //SET RADIUS 버튼 함수
 void CcircleMakerDlg::OnBnClickedSetRadius()
 {
+	//원 그려져있을때 실행 종료
+	if (!m_clickPoints.empty())
+	{
+		AfxMessageBox(_T("RESET을 먼저 해주세요!"));
+		return;
+	}
+
 	//초기화 함수
 	CRect rect;
 	GetClientRect(&rect);
 	int nWidth = rect.Width();
 	int nHeight = rect.Height();
 	int nBpp = 8;
+
+	if (!m_image.IsNull())
+	{
+		m_image.Destroy();
+	}//기존 이미지 제거
 
 	m_image.Create(nWidth, -nHeight, nBpp);
 	if (nBpp == 8) {
@@ -227,7 +241,22 @@ void CcircleMakerDlg::OnBnClickedSetRadius()
 	if (r > 0)
 	{
 		m_radius = r;
-		AfxMessageBox(_T("반지름이 설정되었습니다!"));
+	}
+	else
+	{
+		AfxMessageBox(_T("유효한 값을 입력하세요!"));
+	}
+}
+
+//SET BORDER 버튼 함수
+void CcircleMakerDlg::OnBnClickedSetBorder()
+{
+	CString str;
+	GetDlgItemText(IDC_EDIT_BORDER, str);
+	int border = _ttoi(str);
+	if (border > 0)
+	{
+		m_border = border;
 	}
 	else
 	{
@@ -378,19 +407,22 @@ void CcircleMakerDlg::drawHollowCircleSafe(unsigned char* fm, int x, int y, int 
 	int nCenterX = x + nRadius;
 	int nCenterY = y + nRadius;
 	int nPitch = m_image.GetPitch();
-	int borderThickness = 5;
-	int innerRadius = nRadius - borderThickness;
-
 	int nWidth = m_image.GetWidth();
 	int nHeight = m_image.GetHeight();
 
-	for (int j = y; j < y + nRadius * 2; j++) {
-		for (int i = x; i < x + nRadius * 2; i++) {
-			// 이미지 영역 체크
+	int borderThickness = m_border;  // input
+	int halfThickness = borderThickness / 2;
+
+	// 짝수일 때 남는 1두께를 안쪽으로
+	int innerRadius = nRadius - halfThickness;
+	int outerRadius = nRadius + (borderThickness - halfThickness);
+
+	for (int j = y - borderThickness; j < y + nRadius * 2 + borderThickness; j++) {
+		for (int i = x - borderThickness; i < x + nRadius * 2 + borderThickness; i++) {
 			if (i < 0 || i >= nWidth || j < 0 || j >= nHeight)
 				continue;
 
-			if (isInCircle(i, j, nCenterX, nCenterY, nRadius)) {
+			if (isInCircle(i, j, nCenterX, nCenterY, outerRadius)) {
 				if (!isInCircle(i, j, nCenterX, nCenterY, innerRadius)) {
 					fm[j * nPitch + i] = nGray;
 				}
