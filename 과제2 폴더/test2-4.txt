@@ -1,0 +1,23 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<int> solution(vector<int> arr, vector<bool> flag) {
+    vector<int> answer;
+    
+    for(int i=0;i<arr.size();i++){
+        if(flag[i]){
+            for(int n=0;n<arr[i];n++){
+                answer.push_back(arr[i]);
+                answer.push_back(arr[i]);
+            }
+        }else{
+            for(int n=0;n<arr[i];n++){
+                answer.pop_back();
+            }
+        }
+    }
+    
+    return answer;
+}
