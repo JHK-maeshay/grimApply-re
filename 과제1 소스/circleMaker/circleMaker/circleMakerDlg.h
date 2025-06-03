@@ -56,7 +56,7 @@ private:
 	void drawCircle(unsigned char* fm, int x, int y, int nRadius, int nGray);
 	bool isInCircle(int i, int j, int nCenterX, int nCenterY, int nRadius); //draw circle
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point); //draw trigger
-	void drawHollowCircle(unsigned char* fm, int x, int y, int nRadius, int nGray); // draw border circle
+	void makeHollowCircle(); //draw border circle
 	void drawHollowCircleSafe(unsigned char* fm, int x, int y, int nRadius, int nGray); //check circle crop
 
 	bool m_isDragging = false;
@@ -64,7 +64,7 @@ private:
 	ULONGLONG m_lastUpdateTime = 0;
 
 	void OnMouseMove(UINT nFlags, CPoint point);//drag func
-	void OnLButtonUp(UINT nFlags, CPoint point);
+	void OnLButtonUp(UINT nFlags, CPoint point);//drag end
 
 	DECLARE_MESSAGE_MAP()
 };
